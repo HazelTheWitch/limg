@@ -5,4 +5,6 @@ use clap::Parser;
 pub struct Arguments {
     pub input: String,
     pub target_format: String,
+    #[arg(short, long, default_value = "false")]
+    pub delete_after: bool,
 }
