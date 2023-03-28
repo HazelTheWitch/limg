@@ -2,6 +2,14 @@
 
 Teeny image converter.
 
+## Installation
+
+```bash
+git clone https://github.com/HazelTheWitch/limg.git
+cd limg
+cargo install --path .
+```
+
 ## Usage
 
 ```bash
