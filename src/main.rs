@@ -1,19 +1,21 @@
-use std::{path::PathBuf, fs};
+use std::{path::{Path, PathBuf}, fs};
 
 use anyhow::anyhow;
 use clap::Parser;
 use limg::Arguments;
 
-pub fn convert(mut path: PathBuf, format: &str) -> Result<(), anyhow::Error> {
-    let image = image::io::Reader::open(path.clone())?.decode()?;
+pub fn convert<Q: AsRef<Path>>(path: Q, format: &str) -> Result<PathBuf, anyhow::Error> {
+    let mut p = path.as_ref().to_path_buf();
 
-    if !path.set_extension(format) {
-        return Err(anyhow!("Could not change extension for: {path:?}"));
+    let image = image::io::Reader::open(&p)?.decode()?;
+
+    if !p.set_extension(format) {
+        return Err(anyhow!("Could not change extension for: {:?}", p));
     }
 
-    image.save(path)?;
+    image.save(&p)?;
 
-    Ok(())
+    Ok(p)
 }
 
 fn main() {
@@ -22,10 +24,11 @@ fn main() {
     for image in glob::glob(&args.input).expect("Invalid glob pattern") {
         match image {
             Ok(path) => {
-                match convert(path.clone(), &args.target_format) {
-                    Ok(_) => {
+                match convert(&path, &args.target_format) {
+                    Ok(output) => {
+                        println!("{path:?} -> {output:?}");
                         if args.delete_after {
-                            if let Err(e) = fs::remove_file(path.clone()) {
+                            if let Err(e) = fs::remove_file(&path) {
                                 println!("Error removing {path:?}: {e:?}");
                             }
                         }
